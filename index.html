@@ -1,0 +1,6127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>دليل المطاعم وإدارة الدعم</title>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+
+    font-family:
+        'Segoe UI',
+        Tahoma,
+        Geneva,
+        Verdana,
+        sans-serif;
+}
+
+html,
+body,
+body *,
+button,
+input,
+textarea,
+select,
+a{
+    cursor:none !important;
+}
+
+html,
+body{
+    min-height:100%;
+}
+
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    color:#333;
+    background:#111;
+}
+
+
+/* =========================
+   VIDEO
+========================= */
+
+#background-video{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:-3;
+    pointer-events:none;
+    background:#111;
+}
+
+.video-overlay{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    pointer-events:none;
+    background:rgba(0,0,0,.42);
+}
+
+
+/* =========================
+   CURSOR
+========================= */
+
+#catCursor{
+    position:fixed;
+    left:0;
+    top:0;
+    width:auto;
+    height:2cm;
+    z-index:2147483647;
+    object-fit:contain;
+    pointer-events:none;
+    user-select:none;
+    transform:translateX(-50%);
+    will-change:left,top,transform;
+}
+
+#catCursor.clicking{
+    transform:
+        translateX(-50%)
+        scale(.96);
+}
+
+
+/* =========================
+   CLOSED
+========================= */
+
+#site-closed{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:20000;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    text-align:center;
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(17,24,39,.97),
+            rgba(31,41,55,.97)
+        );
+}
+
+.closed-box{
+    width:100%;
+    max-width:450px;
+    padding:40px 25px;
+    border-radius:20px;
+
+    background:rgba(255,255,255,.08);
+
+    border:
+        1px solid
+        rgba(255,255,255,.15);
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,.3);
+}
+
+.closed-box i{
+    margin-bottom:20px;
+    font-size:55px;
+}
+
+.closed-box h2{
+    margin-bottom:12px;
+}
+
+.closed-box p{
+    line-height:1.8;
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+#login-screen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    background:
+        rgba(0,0,0,.28);
+}
+
+.login-box{
+    width:90%;
+    max-width:420px;
+    padding:40px 30px;
+    border-radius:16px;
+    text-align:center;
+
+    background:
+        rgba(255,255,255,.94);
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:
+        0 15px 30px
+        rgba(0,0,0,.35);
+}
+
+.login-box h2{
+    margin-bottom:20px;
+    color:#1e3c72;
+}
+
+.login-box input{
+    width:100%;
+    margin-bottom:12px;
+    padding:13px;
+
+    border:
+        2px solid
+        #e0e0e0;
+
+    border-radius:8px;
+    outline:none;
+    font-size:16px;
+
+    text-align:left;
+    direction:ltr;
+}
+
+.login-box input:focus{
+    border-color:#1e3c72;
+}
+
+.login-box button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:8px;
+
+    color:white;
+    background:#1e3c72;
+
+    font-size:16px;
+    font-weight:bold;
+}
+
+.error-card{
+    display:none;
+    margin-top:15px;
+    padding:10px;
+
+    border:
+        1px solid
+        #f5c6cb;
+
+    border-radius:8px;
+
+    color:#d9534f;
+    background:#ffe6e6;
+
+    font-size:14px;
+    line-height:1.7;
+
+    text-align:right;
+    direction:rtl;
+
+    word-break:break-word;
+}
+
+.by-shishy-login{
+    margin-top:15px;
+    color:#777;
+    font-size:11px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+#main-content{
+    display:none;
+    min-height:100vh;
+}
+
+header{
+    padding:20px;
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(30,60,114,.95),
+            rgba(42,82,152,.95)
+        );
+
+    box-shadow:
+        0 4px 15px
+        rgba(0,0,0,.15);
+
+    backdrop-filter:blur(5px);
+}
+
+.header-top{
+    max-width:1200px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:10px;
+    flex-wrap:wrap;
+
+    margin:
+        0 auto 15px;
+}
+
+.header-user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.header-user h1{
+    font-size:27px;
+}
+
+.user-badge{
+    padding:8px 14px;
+    border-radius:20px;
+
+    white-space:nowrap;
+
+    background:
+        rgba(255,255,255,.15);
+
+    font-size:13px;
+}
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.header-btn{
+    padding:9px 15px;
+    border:none;
+    border-radius:20px;
+    color:white;
+    font-weight:bold;
+}
+
+.add-btn{
+    background:#25D366;
+}
+
+.chat-btn{
+    background:#111827;
+}
+
+.admin-btn{
+    background:#f59e0b;
+}
+
+.logout-btn{
+    background:#dc3545;
+}
+
+.search-container{
+    position:relative;
+    max-width:700px;
+    margin:0 auto;
+}
+
+.search-container input{
+    width:100%;
+
+    padding:
+        14px
+        45px
+        14px
+        20px;
+
+    border:none;
+    border-radius:25px;
+    outline:none;
+    font-size:16px;
+
+    box-shadow:
+        0 4px 10px
+        rgba(0,0,0,.1);
+}
+
+.search-container i{
+    position:absolute;
+    top:50%;
+    right:15px;
+    color:#888;
+
+    transform:
+        translateY(-50%);
+}
+
+
+/* =========================
+   ADMIN
+========================= */
+
+#admin-section{
+    display:none;
+    width:100%;
+    padding:25px 20px 5px;
+}
+
+.admin-box{
+    width:100%;
+    max-width:1100px;
+
+    margin:0 auto;
+    padding:25px;
+
+    border-radius:18px;
+    background:white;
+
+    box-shadow:
+        0 10px 35px
+        rgba(0,0,0,.20);
+}
+
+.admin-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:15px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.admin-top h2{
+    color:#1e3c72;
+}
+
+.admin-top-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.admin-main-btn{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+
+    color:white;
+    background:#1e3c72;
+
+    font-weight:bold;
+}
+
+.admin-close-btn{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+
+    color:white;
+    background:#6c757d;
+
+    font-weight:bold;
+}
+
+.users-table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.users-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.users-table th,
+.users-table td{
+    padding:11px;
+
+    border-bottom:
+        1px solid
+        #eee;
+
+    text-align:center;
+    white-space:nowrap;
+}
+
+.users-table th{
+    color:#1e3c72;
+    background:#f3f4f6;
+}
+
+.status-active{
+    color:#198754;
+    font-weight:bold;
+}
+
+.status-disabled{
+    color:#dc3545;
+    font-weight:bold;
+}
+
+.user-action{
+    margin:2px;
+    padding:7px 10px;
+
+    border:none;
+    border-radius:6px;
+
+    color:white;
+}
+
+.disable-user{
+    background:#f59e0b;
+}
+
+.delete-user{
+    background:#dc3545;
+}
+
+
+/* =========================
+   RESTAURANTS
+========================= */
+
+.container{
+    width:100%;
+    max-width:1200px;
+
+    margin:30px auto;
+
+    padding:0 20px;
+}
+
+.restaurants-grid{
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(
+                300px,
+                1fr
+            )
+        );
+
+    gap:20px;
+
+    justify-content:center;
+}
+
+.card{
+    width:100%;
+    padding:20px;
+
+    border-radius:12px;
+
+    background:
+        rgba(255,255,255,.96);
+
+    box-shadow:
+        0 4px 12px
+        rgba(0,0,0,.08);
+
+    backdrop-filter:
+        blur(5px);
+
+    transition:.3s;
+}
+
+.card:hover{
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        0 12px 20px
+        rgba(0,0,0,.2);
+}
+
+.card h3{
+    margin:0 0 15px;
+
+    padding-bottom:10px;
+
+    color:#1e3c72;
+
+    border-bottom:
+        2px solid
+        #f0f0f0;
+
+    font-size:20px;
+
+    text-align:center;
+}
+
+.btn-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:8px;
+
+    padding:10px;
+
+    border:none;
+    border-radius:8px;
+
+    color:white;
+    text-decoration:none;
+
+    font-size:14px;
+    font-weight:bold;
+}
+
+.btn-whatsapp-group{
+    background:#25D366;
+}
+
+.btn-phone{
+    background:#007bff;
+}
+
+.btn-whatsapp-direct{
+    background:#128C7E;
+}
+
+.btn-chat{
+    background:#111827;
+}
+
+.btn-edit{
+    background:#6c757d;
+}
+
+.btn-delete{
+    background:#dc3545;
+}
+
+
+/* =========================
+   CHAT
+========================= */
+
+#chat-section{
+    display:none;
+
+    position:fixed;
+    inset:0;
+    z-index:8000;
+
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    background:
+        rgba(0,0,0,.65);
+}
+
+.chat-box{
+    width:100%;
+    max-width:1100px;
+    height:90vh;
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    border-radius:18px;
+
+    background:#efeae2;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.4);
+}
+
+.chat-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:15px;
+    padding:15px 20px;
+
+    color:white;
+    background:#128C7E;
+}
+
+.chat-header-info{
+    min-width:0;
+}
+
+.chat-header-info h2{
+    overflow:hidden;
+
+    font-size:19px;
+
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.chat-header-info small{
+    opacity:.8;
+}
+
+.chat-close{
+    flex:none;
+
+    padding:8px 13px;
+
+    border:none;
+    border-radius:8px;
+
+    color:white;
+    background:#dc3545;
+}
+
+.chat-body{
+    flex:1;
+    min-height:0;
+
+    display:flex;
+}
+
+.chat-sidebar{
+    width:320px;
+    min-width:280px;
+    min-height:0;
+
+    display:flex;
+    flex-direction:column;
+
+    background:#ffffff;
+
+    border-left:
+        1px solid
+        #d9dde3;
+}
+
+.chat-search-box{
+    position:relative;
+    flex:none;
+    padding:10px;
+
+    background:#f0f2f5;
+
+    border-bottom:
+        1px solid
+        #e1e5ea;
+}
+
+.chat-search-box i{
+    position:absolute;
+    top:50%;
+    right:22px;
+
+    color:#777;
+
+    transform:translateY(-50%);
+    pointer-events:none;
+}
+
+.chat-search-box input{
+    width:100%;
+
+    padding:9px 38px 9px 12px;
+
+    border:1px solid #d6d9dd;
+    border-radius:9px;
+    outline:none;
+
+    background:#ffffff;
+    color:#222;
+
+    font-size:13px;
+}
+
+.chat-search-box input:focus{
+    border-color:#25D366;
+    box-shadow:0 0 0 2px rgba(37,211,102,.10);
+}
+
+.conversations{
+    flex:1;
+    min-height:0;
+    width:100%;
+
+    overflow-y:auto;
+
+    background:white;
+}
+
+.chat-top-info{
+    padding:15px;
+
+    border-bottom:
+        1px solid
+        #ddd;
+
+    background:#fff;
+
+    text-align:center;
+}
+
+.chat-top-info h3{
+    color:#1e3c72;
+    margin-bottom:8px;
+}
+
+.chat-top-info .restaurant-phone{
+    display:block;
+
+    direction:ltr;
+
+    color:#555;
+
+    font-size:12px;
+}
+
+.create-conversation-btn{
+    display:block;
+
+    width:
+        calc(
+            100% - 30px
+        );
+
+    margin:15px;
+
+    padding:11px;
+
+    border:none;
+    border-radius:9px;
+
+    color:white;
+    background:#1e3c72;
+
+    font-weight:bold;
+}
+
+.conversation-item{
+    position:relative;
+
+    padding:12px 14px;
+
+    border-bottom:
+        1px solid
+        #eeeeee;
+
+    transition:.15s;
+    cursor:pointer;
+}
+
+.conversation-item:hover{
+    background:#f5f6f6;
+}
+
+.conversation-item.active{
+    background:#e8f5e9;
+}
+
+.conversation-item h4{
+    margin-bottom:5px;
+    color:#163b32;
+    font-size:14px;
+}
+
+.conversation-item small{
+    color:#777;
+}
+
+.conversation-phone{
+    display:block;
+
+    margin-top:6px;
+
+    direction:ltr;
+
+    color:#555;
+
+    font-size:12px;
+
+    text-align:right;
+}
+
+.empty-chat{
+    padding:30px 20px;
+
+    color:#777;
+
+    line-height:1.8;
+
+    text-align:center;
+}
+
+.messages-panel{
+    flex:1;
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+}
+
+.messages{
+    flex:1;
+
+    overflow-y:auto;
+
+    padding:14px 18px;
+
+    background:#efeae2;
+}
+
+.message{
+    display:table;
+    width:auto;
+    max-width:min(78%, 520px);
+
+    margin-bottom:6px;
+
+    padding:5px 8px 4px;
+
+    border-radius:9px;
+
+    box-shadow:
+        0 1px 2px
+        rgba(0,0,0,.10);
+
+    font-size:12px;
+
+    overflow-wrap:anywhere;
+}
+
+.message.employee{
+    margin-right:auto;
+
+    background:#d9fdd3;
+
+    border-bottom-right-radius:3px;
+}
+
+.message.restaurant{
+    margin-left:auto;
+
+    background:#ffffff;
+
+    border-bottom-left-radius:3px;
+}
+
+.message-sender{
+    margin-bottom:2px;
+
+    color:#1e3c72;
+
+    font-size:9px;
+
+    font-weight:bold;
+}
+
+.message-text{
+    font-size:12px;
+    line-height:1.45;
+
+    word-break:break-word;
+
+    white-space:pre-wrap;
+}
+
+.message-time{
+    margin-top:2px;
+
+    color:#888;
+
+    font-size:8px;
+    text-align:left;
+}
+
+
+.chat-input-area{
+    display:flex;
+
+    gap:8px;
+
+    padding:12px;
+
+    border-top:
+        1px solid
+        #ddd;
+
+    background:white;
+}
+
+.chat-input{
+    flex:1;
+
+    min-height:45px;
+    max-height:120px;
+
+    padding:12px;
+
+    resize:none;
+
+    border:
+        1px solid
+        #ccc;
+
+    border-radius:10px;
+
+    outline:none;
+}
+
+.send-btn{
+    flex:none;
+
+    padding:0 20px;
+
+    border:none;
+
+    border-radius:10px;
+
+    color:white;
+    background:#25D366;
+
+    font-weight:bold;
+}
+
+.send-btn:disabled{
+    background:#aaa;
+    opacity:.7;
+}
+
+
+
+
+/* =========================
+   CHAT RESPONSIVE
+========================= */
+
+@media (max-width: 760px){
+
+    .chat-box{
+        width:100%;
+        height:95vh;
+        border-radius:12px;
+    }
+
+    .chat-body{
+        flex-direction:column;
+    }
+
+    .chat-sidebar{
+        width:100%;
+        min-width:0;
+        max-height:42%;
+        border-left:none;
+        border-bottom:1px solid #d9dde3;
+    }
+
+    .messages-panel{
+        min-height:58%;
+    }
+
+    .message{
+        max-width:88%;
+    }
+}
+
+/* =========================
+   MODALS
+========================= */
+
+.modal{
+    display:none;
+
+    position:fixed;
+    inset:0;
+    z-index:10000;
+
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    background:
+        rgba(0,0,0,.6);
+}
+
+.modal-content{
+    width:90%;
+    max-width:550px;
+
+    max-height:90vh;
+
+    overflow-y:auto;
+
+    padding:30px;
+
+    border-radius:12px;
+
+    background:white;
+}
+
+.modal-content h2{
+    margin-bottom:20px;
+    color:#1e3c72;
+}
+
+.modal-content label{
+    display:block;
+
+    margin:
+        8px
+        0
+        5px;
+
+    color:#444;
+
+    font-size:12px;
+    font-weight:bold;
+}
+
+.modal-content input{
+    width:100%;
+
+    margin-bottom:12px;
+
+    padding:11px;
+
+    border:
+        1px solid
+        #ccc;
+
+    border-radius:7px;
+
+    outline:none;
+
+    direction:ltr;
+}
+
+.modal-content .arabic-input{
+    direction:rtl;
+    text-align:right;
+}
+
+.channel-card{
+    margin-bottom:15px;
+
+    padding:15px;
+
+    border:
+        1px solid
+        #ddd;
+
+    border-radius:12px;
+
+    background:#fafafa;
+}
+
+.channel-card-title{
+    margin-bottom:10px;
+
+    color:#1e3c72;
+
+    font-size:15px;
+    font-weight:bold;
+}
+
+.channel-help{
+    margin-bottom:10px;
+
+    color:#777;
+
+    font-size:11px;
+    line-height:1.7;
+}
+
+.modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+.save-btn{
+    flex:1;
+
+    padding:11px;
+
+    border:none;
+    border-radius:7px;
+
+    color:white;
+    background:#1e3c72;
+
+    font-weight:bold;
+}
+
+.close-btn{
+    flex:1;
+
+    padding:11px;
+
+    border:none;
+    border-radius:7px;
+
+    color:#333;
+    background:#ccc;
+
+    font-weight:bold;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    .header-top{
+        align-items:flex-start;
+    }
+
+    .header-actions{
+        width:100%;
+    }
+
+    .header-btn{
+        flex:1;
+    }
+
+    .restaurants-grid{
+        grid-template-columns:1fr;
+    }
+
+    .chat-body{
+        flex-direction:column;
+    }
+
+    .conversations{
+        width:100%;
+        height:300px;
+
+        flex:none;
+
+        border-left:none;
+
+        border-bottom:
+            1px solid
+            #ddd;
+    }
+
+    .message{
+        max-width:90%;
+    }
+
+    .chat-box{
+        height:94vh;
+    }
+
+    .login-box{
+        padding:30px 20px;
+    }
+
+    .admin-box{
+        padding:15px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<video
+    id="background-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+>
+
+    <source
+        src="./main-bg.mp4"
+        type="video/mp4"
+    >
+
+</video>
+
+<div class="video-overlay"></div>
+
+
+<img
+    id="catCursor"
+    src="./cat-paw.png"
+    alt="cat paw"
+>
+
+
+<div id="site-closed">
+
+    <div class="closed-box">
+
+        <i class="fa-solid fa-power-off"></i>
+
+        <h2>
+            الموقع متوقف حاليًا
+        </h2>
+
+        <p>
+            الموقع غير متاح في الوقت الحالي.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- LOGIN -->
+
+<div id="login-screen">
+
+    <div class="login-box">
+
+        <h2>
+            تسجيل الدخول
+        </h2>
+
+
+        <input
+            id="login-email"
+            type="email"
+            placeholder="البريد الإلكتروني"
+            autocomplete="username"
+        >
+
+
+        <input
+            id="login-password"
+            type="password"
+            placeholder="كلمة السر"
+            autocomplete="current-password"
+        >
+
+
+        <button
+            type="button"
+            onclick="loginUser()"
+        >
+            دخول
+        </button>
+
+
+        <div
+            id="error-msg"
+            class="error-card"
+        ></div>
+
+
+        <div class="by-shishy-login">
+            by shishy
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MAIN -->
+
+<div id="main-content">
+
+<header>
+
+    <div class="header-top">
+
+        <div class="header-user">
+
+            <h1>
+                دليل المطاعم
+            </h1>
+
+            <div
+                id="current-user-badge"
+                class="user-badge"
+            >
+                جاري التحميل...
+            </div>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button
+                id="add-restaurant-button"
+                class="header-btn add-btn"
+                onclick="openAddModal()"
+                style="display:none"
+                type="button"
+            >
+
+                <i class="fa-solid fa-plus"></i>
+
+                إضافة مطعم
+
+            </button>
+
+
+            <button
+                class="header-btn chat-btn"
+                onclick="openChat()"
+                type="button"
+            >
+
+                <i
+                    class="fa-solid fa-comments"
+                ></i>
+
+                المحادثات
+
+            </button>
+
+
+            <button
+                id="admin-button"
+                class="header-btn admin-btn"
+                onclick="openAdmin()"
+                style="display:none"
+                type="button"
+            >
+
+                <i
+                    class="fa-solid fa-users-gear"
+                ></i>
+
+                الموظفين
+
+            </button>
+
+
+            <button
+                class="header-btn logout-btn"
+                onclick="logoutUser()"
+                type="button"
+            >
+
+                <i
+                    class="fa-solid fa-right-from-bracket"
+                ></i>
+
+                خروج
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="search-container">
+
+        <i
+            class="fa-solid fa-magnifying-glass"
+        ></i>
+
+        <input
+            id="search-input"
+            type="text"
+            placeholder="ابحث باسم المطعم..."
+            oninput="filterRestaurants()"
+        >
+
+    </div>
+
+</header>
+
+
+<!-- ADMIN -->
+
+<section id="admin-section">
+
+    <div class="admin-box">
+
+        <div class="admin-top">
+
+            <h2>
+                إدارة الموظفين
+            </h2>
+
+            <div class="admin-top-actions">
+
+                <button
+                    class="admin-main-btn"
+                    type="button"
+                    onclick="openEmployeeModal()"
+                >
+
+                    <i
+                        class="fa-solid fa-user-plus"
+                    ></i>
+
+                    إضافة موظف
+
+                </button>
+
+
+                <button
+                    class="admin-close-btn"
+                    type="button"
+                    onclick="closeAdmin()"
+                >
+                    إغلاق الإدارة
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="users-table-wrapper">
+
+            <table class="users-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            الاسم
+                        </th>
+
+                        <th>
+                            البريد
+                        </th>
+
+                        <th>
+                            الصلاحية
+                        </th>
+
+                        <th>
+                            الحالة
+                        </th>
+
+                        <th>
+                            الإجراءات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="users-table-body"
+                ></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- RESTAURANTS -->
+
+<div class="container">
+
+    <div
+        id="restaurants-list"
+        class="restaurants-grid"
+    ></div>
+
+</div>
+
+</div>
+
+
+<!-- RESTAURANT MODAL -->
+
+<div
+    id="restaurant-modal"
+    class="modal"
+>
+
+    <div class="modal-content">
+
+        <h2 id="modal-title">
+            إضافة مطعم جديد
+        </h2>
+
+
+        <input
+            id="edit-id"
+            type="hidden"
+        >
+
+
+        <label>
+            اسم المطعم
+        </label>
+
+        <input
+            id="restaurant-name"
+            class="arabic-input"
+            type="text"
+            placeholder="اسم المطعم"
+        >
+
+
+        <label>
+            رقم الهاتف
+        </label>
+
+        <input
+            id="restaurant-phone"
+            type="text"
+            placeholder="مثال: 040xxxxxxx"
+        >
+
+
+        <label>
+            رقم واتساب المطعم
+        </label>
+
+        <input
+            id="restaurant-whatsapp"
+            type="text"
+            placeholder="مثال: 2012xxxxxxxx"
+        >
+
+
+        <div class="channel-card">
+
+            <div class="channel-card-title">
+
+                <i
+                    class="fa-brands fa-whatsapp"
+                ></i>
+
+                رابط جروب المطعم
+
+            </div>
+
+
+            <div class="channel-help">
+
+                اكتب رابط جروب الواتساب الخاص بالمطعم.
+
+            </div>
+
+
+            <input
+                id="restaurant-group"
+                type="text"
+                placeholder="https://chat.whatsapp.com/..."
+            >
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                class="save-btn"
+                type="button"
+                onclick="saveRestaurant()"
+            >
+                حفظ
+            </button>
+
+
+            <button
+                class="close-btn"
+                type="button"
+                onclick="closeModal('restaurant-modal')"
+            >
+                إلغاء
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- EMPLOYEE MODAL -->
+
+<div
+    id="employee-modal"
+    class="modal"
+>
+
+    <div class="modal-content">
+
+        <h2>
+            إضافة موظف
+        </h2>
+
+
+        <input
+            id="employee-email"
+            type="email"
+            placeholder="البريد الإلكتروني"
+        >
+
+
+        <input
+            id="employee-password"
+            type="password"
+            placeholder="كلمة السر"
+        >
+
+
+        <input
+            id="employee-name"
+            class="arabic-input"
+            type="text"
+            placeholder="اسم الموظف"
+        >
+
+
+        <input
+            type="text"
+            value="موظف"
+            readonly
+            style="
+                background:#f3f4f6;
+                color:#555;
+                direction:rtl;
+                text-align:right;
+            "
+        >
+
+
+        <input
+            id="employee-role"
+            type="hidden"
+            value="employee"
+        >
+
+
+        <div class="modal-actions">
+
+            <button
+                class="save-btn"
+                type="button"
+                onclick="createEmployee()"
+            >
+                إنشاء الحساب
+            </button>
+
+
+            <button
+                class="close-btn"
+                type="button"
+                onclick="closeModal('employee-modal')"
+            >
+                إلغاء
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CHAT -->
+
+<div id="chat-section">
+
+    <div class="chat-box">
+
+        <div class="chat-header">
+
+            <div class="chat-header-info">
+
+                <h2
+                    id="chat-restaurant-name"
+                >
+                    اختر مطعمًا
+                </h2>
+
+                <small
+                    id="chat-business-number"
+                >
+                    رقم المطعم
+                </small>
+
+            </div>
+
+
+            <button
+                class="chat-close"
+                type="button"
+                onclick="closeChat()"
+            >
+                إغلاق
+            </button>
+
+        </div>
+
+
+        <div class="chat-body">
+
+            <div class="chat-sidebar">
+
+                <div class="chat-search-box">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        id="chat-restaurant-search"
+                        type="text"
+                        placeholder="ابحث عن مطعم..."
+                        autocomplete="off"
+                        oninput="filterChatRestaurants(this.value)"
+                    >
+
+                </div>
+
+                <div
+                    id="conversations-list"
+                    class="conversations"
+                >
+
+                    <div class="empty-chat">
+                        اختر مطعمًا.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="messages-panel">
+
+                <div
+                    id="messages-list"
+                    class="messages"
+                >
+
+                    <div
+                        style="
+                            padding:40px;
+                            color:#777;
+                            text-align:center;
+                        "
+                    >
+                        اختر مطعمًا.
+                    </div>
+
+                </div>
+
+
+                <div class="chat-input-area">
+
+                    <textarea
+                        id="message-input"
+                        class="chat-input"
+                        placeholder="اكتب رسالة..."
+                    ></textarea>
+
+
+                    <button
+                        id="send-message-button"
+                        class="send-btn"
+                        type="button"
+                        onclick="sendMessage()"
+                    >
+                        إرسال
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+   SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+    "https://eauapduflgbrdhkpiudc.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_Hs0GmWAaQcx-Q2Ehiau8cg_n8v-ZMZp";
+
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+        {
+            auth:{
+                persistSession:false,
+                autoRefreshToken:false,
+                detectSessionInUrl:false
+            }
+        }
+    );
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let currentRestaurants = [];
+
+let currentSiteEnabled = true;
+
+let currentEditId = null;
+
+let currentUser = null;
+
+let currentProfile = null;
+
+let currentRestaurantId = null;
+
+let currentRestaurant = null;
+
+let currentConversationId = null;
+
+let currentLastMessageId = null;
+
+let chatRealtimeChannel = null;
+
+let chatRefreshTimer = null;
+
+let conversationRefreshTimer = null;
+
+let chatRefreshBusy = false;
+
+let conversationRefreshBusy = false;
+
+let currentConversationSignature = "";
+
+
+/* =====================================================
+   CURSOR
+===================================================== */
+
+const catCursor =
+    document.getElementById(
+        "catCursor"
+    );
+
+
+document.addEventListener(
+    "mousemove",
+    e => {
+
+        catCursor.style.left =
+            e.clientX + "px";
+
+        catCursor.style.top =
+            e.clientY + "px";
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+document.addEventListener(
+    "mousedown",
+    () => {
+
+        catCursor.src =
+            "./cat-paw-click.png";
+
+        catCursor.classList.add(
+            "clicking"
+        );
+
+    }
+);
+
+
+document.addEventListener(
+    "mouseup",
+    () => {
+
+        catCursor.src =
+            "./cat-paw.png";
+
+        catCursor.classList.remove(
+            "clicking"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHTML(value){
+
+    return String(
+        value ?? ""
+    )
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+function normalizeInternationalNumber(
+    value
+){
+
+    if(!value){
+
+        return "";
+    }
+
+
+    let digits =
+        String(value)
+            .trim()
+            .replace(
+                /\D/g,
+                ""
+            );
+
+
+    if(!digits){
+
+        return "";
+    }
+
+
+    if(
+        digits.startsWith("00")
+    ){
+
+        digits =
+            digits.substring(2);
+    }
+
+
+    if(
+        digits.startsWith("0")
+    ){
+
+        digits =
+            "20" +
+            digits.substring(1);
+    }
+
+
+    return digits;
+}
+
+
+function makeWhatsAppLink(
+    value
+){
+
+    const phone =
+        normalizeInternationalNumber(
+            value
+        );
+
+
+    return phone
+        ?
+            "https://wa.me/" +
+            phone
+        :
+            "";
+}
+
+
+function makePhoneLink(
+    value
+){
+
+    const phone =
+        normalizeInternationalNumber(
+            value
+        );
+
+
+    return phone
+        ?
+            "tel:+" +
+            phone
+        :
+            "";
+}
+
+
+/* =====================================================
+   SITE STATUS
+===================================================== */
+
+async function loadSiteStatus(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "site_settings"
+                )
+                .select(
+                    "site_enabled"
+                )
+                .eq(
+                    "id",
+                    1
+                )
+                .maybeSingle();
+
+
+        if(error){
+
+            console.error(
+                error
+            );
+
+            return true;
+        }
+
+
+        return data
+            ?
+                Boolean(
+                    data.site_enabled
+                )
+            :
+                true;
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+        return true;
+    }
+}
+
+
+function applySiteStatus(
+    enabled
+){
+
+    currentSiteEnabled =
+        enabled;
+
+
+    const closed =
+        document.getElementById(
+            "site-closed"
+        );
+
+    const login =
+        document.getElementById(
+            "login-screen"
+        );
+
+    const main =
+        document.getElementById(
+            "main-content"
+        );
+
+
+    if(!enabled){
+
+        closed.style.display =
+            "flex";
+
+        login.style.display =
+            "none";
+
+        main.style.display =
+            "none";
+
+        return;
+    }
+
+
+    closed.style.display =
+        "none";
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+async function loginUser(){
+
+    const email =
+        document
+            .getElementById(
+                "login-email"
+            )
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById(
+                "login-password"
+            )
+            .value;
+
+
+    document.getElementById(
+        "error-msg"
+    ).style.display =
+        "none";
+
+
+    if(
+        !email ||
+        !password
+    ){
+
+        showLoginError(
+            "اكتب البريد الإلكتروني وكلمة السر."
+        );
+
+        return;
+    }
+
+
+    const enabled =
+        await loadSiteStatus();
+
+
+    if(!enabled){
+
+        applySiteStatus(
+            false
+        );
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .auth
+            .signInWithPassword(
+                {
+                    email,
+                    password
+                }
+            );
+
+
+    if(error){
+
+        showLoginError(
+            error.message ||
+            "بيانات الدخول غير صحيحة."
+        );
+
+        return;
+    }
+
+
+    currentUser =
+        data.user;
+
+
+    await loadCurrentProfile();
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+async function loadCurrentProfile(){
+
+    if(!currentUser){
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "profiles"
+            )
+            .select(
+                "id,display_name,role,is_active"
+            )
+            .eq(
+                "id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if(error){
+
+        showLoginError(
+            "تعذر تحميل بيانات المستخدم: " +
+            error.message
+        );
+
+        await supabaseClient
+            .auth
+            .signOut();
+
+        currentUser =
+            null;
+
+        return;
+    }
+
+
+    if(!data){
+
+        showLoginError(
+            "لا يوجد Profile لهذا الحساب."
+        );
+
+        await supabaseClient
+            .auth
+            .signOut();
+
+        currentUser =
+            null;
+
+        return;
+    }
+
+
+    if(!data.is_active){
+
+        showLoginError(
+            "هذا الحساب تم تعطيله بواسطة الإدارة."
+        );
+
+        await supabaseClient
+            .auth
+            .signOut();
+
+        currentUser =
+            null;
+
+        return;
+    }
+
+
+    currentProfile =
+        data;
+
+
+    await showMainApplication();
+}
+
+
+/* =====================================================
+   SHOW APP
+===================================================== */
+
+async function showMainApplication(){
+
+    document.getElementById(
+        "login-screen"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "main-content"
+    ).style.display =
+        "block";
+
+
+    const displayName =
+        currentProfile.display_name ||
+        currentUser.email ||
+        "المستخدم";
+
+
+    const role =
+        String(
+            currentProfile.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    document.getElementById(
+        "current-user-badge"
+    ).innerHTML =
+        `
+        <i class="fa-solid fa-user"></i>
+
+        ${escapeHTML(
+            displayName
+        )}
+
+        -
+
+        ${
+            role === "admin"
+                ?
+                    "Admin"
+                :
+                    "موظف"
+        }
+        `;
+
+
+    if(
+        role === "admin"
+    ){
+
+        document.getElementById(
+            "admin-button"
+        ).style.display =
+            "inline-block";
+
+
+        document.getElementById(
+            "add-restaurant-button"
+        ).style.display =
+            "inline-block";
+
+    }else{
+
+        document.getElementById(
+            "admin-button"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "add-restaurant-button"
+        ).style.display =
+            "none";
+    }
+
+
+    await loadRestaurants();
+}
+
+
+/* =====================================================
+   LOGIN ERROR
+===================================================== */
+
+function showLoginError(
+    message
+){
+
+    const errorMsg =
+        document.getElementById(
+            "error-msg"
+        );
+
+
+    errorMsg.innerHTML =
+        `
+        <i
+            class="fa-solid fa-circle-xmark"
+        ></i>
+
+        ${escapeHTML(
+            message
+        )}
+        `;
+
+
+    errorMsg.style.display =
+        "block";
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+async function logoutUser(){
+
+    stopChatLiveUpdates();
+
+
+    await supabaseClient
+        .auth
+        .signOut();
+
+
+    currentUser =
+        null;
+
+    currentProfile =
+        null;
+
+    currentRestaurantId =
+        null;
+
+    currentRestaurant =
+        null;
+
+    currentConversationId =
+        null;
+
+
+    document.getElementById(
+        "main-content"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "admin-section"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "login-screen"
+    ).style.display =
+        "flex";
+}
+
+
+/* =====================================================
+   RESTAURANTS LOAD
+===================================================== */
+
+async function loadRestaurants(){
+
+    const container =
+        document.getElementById(
+            "restaurants-list"
+        );
+
+
+    container.innerHTML =
+        `
+        <div
+            style="
+                grid-column:1/-1;
+                padding:30px;
+                color:white;
+                text-align:center;
+            "
+        >
+            جاري تحميل المطاعم...
+        </div>
+        `;
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "restaurants"
+            )
+            .select(
+                `
+                id,
+                name,
+                phone,
+                whatsapp_group,
+                whatsapp_number_1
+                `
+            )
+            .order(
+                "name",
+                {
+                    ascending:true
+                }
+            );
+
+
+    if(error){
+
+        container.innerHTML =
+            `
+            <div
+                style="
+                    grid-column:1/-1;
+                    padding:25px;
+                    color:#dc3545;
+                    background:white;
+                    border-radius:12px;
+                    text-align:center;
+                "
+            >
+
+                حدث خطأ أثناء تحميل المطاعم.
+
+                <br><br>
+
+                ${escapeHTML(
+                    error.message
+                )}
+
+            </div>
+            `;
+
+        return;
+    }
+
+
+    currentRestaurants =
+        data || [];
+
+
+    renderRestaurants(
+        currentRestaurants
+    );
+}
+
+
+/* =====================================================
+   RENDER RESTAURANTS
+===================================================== */
+
+function renderRestaurants(
+    restaurants
+){
+
+    const container =
+        document.getElementById(
+            "restaurants-list"
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    if(
+        !restaurants ||
+        restaurants.length === 0
+    ){
+
+        container.innerHTML =
+            `
+            <div
+                style="
+                    grid-column:1/-1;
+                    padding:30px;
+                    color:white;
+                    text-align:center;
+                "
+            >
+                لا توجد مطاعم حتى الآن.
+            </div>
+            `;
+
+        return;
+    }
+
+
+    const role =
+        String(
+            currentProfile?.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    restaurants.forEach(
+        restaurant => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "card";
+
+
+            const phoneLink =
+                restaurant.phone
+                    ?
+                        makePhoneLink(
+                            restaurant.phone
+                        )
+                    :
+                        "";
+
+
+            const whatsappLink =
+                restaurant.whatsapp_number_1
+                    ?
+                        makeWhatsAppLink(
+                            restaurant.whatsapp_number_1
+                        )
+                    :
+                        "";
+
+
+            const groupLink =
+                restaurant.whatsapp_group
+                    ?
+                        String(
+                            restaurant.whatsapp_group
+                        ).trim()
+                    :
+                        "";
+
+
+            let buttons = "";
+
+
+            if(phoneLink){
+
+                buttons +=
+                    `
+                    <a
+                        href="${escapeHTML(
+                            phoneLink
+                        )}"
+                        class="btn btn-phone"
+                    >
+
+                        <i
+                            class="fa-solid fa-phone"
+                        ></i>
+
+                        اتصال
+
+                    </a>
+                    `;
+            }
+
+
+            if(whatsappLink){
+
+                buttons +=
+                    `
+                    <a
+                        href="${escapeHTML(
+                            whatsappLink
+                        )}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-whatsapp-direct"
+                    >
+
+                        <i
+                            class="fa-brands fa-whatsapp"
+                        ></i>
+
+                        واتساب المطعم
+
+                    </a>
+                    `;
+            }
+
+
+            if(groupLink){
+
+                buttons +=
+                    `
+                    <a
+                        href="${escapeHTML(
+                            groupLink
+                        )}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-whatsapp-group"
+                    >
+
+                        <i
+                            class="fa-solid fa-users"
+                        ></i>
+
+                        جروب المطعم
+
+                    </a>
+                    `;
+            }
+
+
+            buttons +=
+                `
+                <button
+                    class="btn btn-chat"
+                    type="button"
+                    onclick="
+                        openRestaurantChat(
+                            '${restaurant.id}'
+                        )
+                    "
+                >
+
+                    <i
+                        class="fa-solid fa-comments"
+                    ></i>
+
+                    المحادثات
+
+                </button>
+                `;
+
+
+            if(
+                role === "admin"
+            ){
+
+                buttons +=
+                    `
+                    <button
+                        class="btn btn-edit"
+                        type="button"
+                        onclick="
+                            openEditModal(
+                                '${restaurant.id}'
+                            )
+                        "
+                    >
+
+                        <i
+                            class="fa-solid fa-pen"
+                        ></i>
+
+                        تعديل
+
+                    </button>
+
+
+                    <button
+                        class="btn btn-delete"
+                        type="button"
+                        onclick="
+                            deleteRestaurant(
+                                '${restaurant.id}'
+                            )
+                        "
+                    >
+
+                        <i
+                            class="fa-solid fa-trash"
+                        ></i>
+
+                        حذف
+
+                    </button>
+                    `;
+            }
+
+
+            card.innerHTML =
+                `
+                <h3>
+
+                    ${escapeHTML(
+                        restaurant.name
+                    )}
+
+                </h3>
+
+
+                <div
+                    class="btn-group"
+                >
+
+                    ${buttons}
+
+                </div>
+                `;
+
+
+            container.appendChild(
+                card
+            );
+        }
+    );
+}
+
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+function filterRestaurants(){
+
+    const query =
+        document
+            .getElementById(
+                "search-input"
+            )
+            .value
+            .toLowerCase()
+            .trim();
+
+
+    const filtered =
+        currentRestaurants.filter(
+            restaurant =>
+                String(
+                    restaurant.name ||
+                    ""
+                )
+                .toLowerCase()
+                .includes(
+                    query
+                )
+        );
+
+
+    renderRestaurants(
+        filtered
+    );
+}
+
+
+/* =====================================================
+   RESTAURANT MODAL
+===================================================== */
+
+function openAddModal(){
+
+    const role =
+        String(
+            currentProfile?.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        role !== "admin"
+    ){
+
+        alert(
+            "هذه العملية للـAdmin فقط."
+        );
+
+        return;
+    }
+
+
+    currentEditId =
+        null;
+
+
+    document.getElementById(
+        "modal-title"
+    ).innerText =
+        "إضافة مطعم جديد";
+
+
+    document.getElementById(
+        "restaurant-name"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "restaurant-phone"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "restaurant-whatsapp"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "restaurant-group"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "restaurant-modal"
+    ).style.display =
+        "flex";
+}
+
+
+function openEditModal(
+    id
+){
+
+    const role =
+        String(
+            currentProfile?.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        role !== "admin"
+    ){
+
+        alert(
+            "هذه العملية للـAdmin فقط."
+        );
+
+        return;
+    }
+
+
+    const restaurant =
+        currentRestaurants.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    id
+                )
+        );
+
+
+    if(!restaurant){
+
+        alert(
+            "المطعم غير موجود."
+        );
+
+        return;
+    }
+
+
+    currentEditId =
+        restaurant.id;
+
+
+    document.getElementById(
+        "modal-title"
+    ).innerText =
+        "تعديل المطعم";
+
+
+    document.getElementById(
+        "restaurant-name"
+    ).value =
+        restaurant.name ||
+        "";
+
+
+    document.getElementById(
+        "restaurant-phone"
+    ).value =
+        restaurant.phone ||
+        "";
+
+
+    document.getElementById(
+        "restaurant-whatsapp"
+    ).value =
+        restaurant.whatsapp_number_1 ||
+        "";
+
+
+    document.getElementById(
+        "restaurant-group"
+    ).value =
+        restaurant.whatsapp_group ||
+        "";
+
+
+    document.getElementById(
+        "restaurant-modal"
+    ).style.display =
+        "flex";
+}
+
+
+/* =====================================================
+   SAVE RESTAURANT
+===================================================== */
+
+async function saveRestaurant(){
+
+    const role =
+        String(
+            currentProfile?.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        role !== "admin"
+    ){
+
+        alert(
+            "هذه العملية للـAdmin فقط."
+        );
+
+        return;
+    }
+
+
+    const name =
+        document.getElementById(
+            "restaurant-name"
+        )
+        .value
+        .trim();
+
+
+    const phone =
+        document.getElementById(
+            "restaurant-phone"
+        )
+        .value
+        .trim();
+
+
+    const whatsapp =
+        normalizeInternationalNumber(
+            document.getElementById(
+                "restaurant-whatsapp"
+            ).value
+        );
+
+
+    const group =
+        document.getElementById(
+            "restaurant-group"
+        )
+        .value
+        .trim();
+
+
+    if(!name){
+
+        alert(
+            "اكتب اسم المطعم."
+        );
+
+        return;
+    }
+
+
+    if(!whatsapp){
+
+        alert(
+            "اكتب رقم واتساب المطعم."
+        );
+
+        return;
+    }
+
+
+    const restaurantData = {
+
+        name,
+
+        phone:
+            phone ||
+            null,
+
+        whatsapp_number_1:
+            whatsapp,
+
+        whatsapp_group:
+            group ||
+            null
+    };
+
+
+    let result;
+
+
+    if(
+        currentEditId
+    ){
+
+        result =
+            await supabaseClient
+                .from(
+                    "restaurants"
+                )
+                .update(
+                    restaurantData
+                )
+                .eq(
+                    "id",
+                    currentEditId
+                );
+
+    }else{
+
+        result =
+            await supabaseClient
+                .from(
+                    "restaurants"
+                )
+                .insert(
+                    restaurantData
+                );
+    }
+
+
+    if(result.error){
+
+        alert(
+            "تعذر حفظ المطعم:\n\n" +
+            result.error.message
+        );
+
+        return;
+    }
+
+
+    closeModal(
+        "restaurant-modal"
+    );
+
+
+    currentEditId =
+        null;
+
+
+    await loadRestaurants();
+}
+
+
+/* =====================================================
+   DELETE RESTAURANT
+===================================================== */
+
+async function deleteRestaurant(
+    restaurantId
+){
+
+    const role =
+        String(
+            currentProfile?.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        role !== "admin"
+    ){
+
+        alert(
+            "حذف المطاعم للـAdmin فقط."
+        );
+
+        return;
+    }
+
+
+    const restaurant =
+        currentRestaurants.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    restaurantId
+                )
+        );
+
+
+    if(!restaurant){
+
+        alert(
+            "المطعم غير موجود."
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "هل أنت متأكد من حذف مطعم:\n\n" +
+            restaurant.name +
+            "\n\nسيتم حذف محادثاته ورسائله أيضًا."
+        );
+
+
+    if(!confirmed){
+
+        return;
+    }
+
+
+    try{
+
+        /*
+           نجيب المحادثات الخاصة بالمطعم
+        */
+
+        const {
+            data: conversations,
+            error:conversationFindError
+        } =
+            await supabaseClient
+                .from(
+                    "conversations"
+                )
+                .select(
+                    "id"
+                )
+                .eq(
+                    "restaurant_id",
+                    restaurantId
+                );
+
+
+        if(
+            conversationFindError
+        ){
+
+            throw new Error(
+                conversationFindError.message
+            );
+        }
+
+
+        const conversationIds =
+            (conversations || [])
+                .map(
+                    item =>
+                        item.id
+                );
+
+
+        /*
+           حذف الرسائل
+        */
+
+        if(
+            conversationIds.length
+        ){
+
+            const {
+                error:
+                    messagesDeleteError
+            } =
+                await supabaseClient
+                    .from(
+                        "messages"
+                    )
+                    .delete()
+                    .in(
+                        "conversation_id",
+                        conversationIds
+                    );
+
+
+            if(
+                messagesDeleteError
+            ){
+
+                throw new Error(
+                    messagesDeleteError.message
+                );
+            }
+        }
+
+
+        /*
+           حذف المحادثات
+        */
+
+        if(
+            conversationIds.length
+        ){
+
+            const {
+                error:
+                    conversationsDeleteError
+            } =
+                await supabaseClient
+                    .from(
+                        "conversations"
+                    )
+                    .delete()
+                    .eq(
+                        "restaurant_id",
+                        restaurantId
+                    );
+
+
+            if(
+                conversationsDeleteError
+            ){
+
+                throw new Error(
+                    conversationsDeleteError.message
+                );
+            }
+        }
+
+
+        /*
+           حذف المطعم
+        */
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "restaurants"
+                )
+                .delete()
+                .eq(
+                    "id",
+                    restaurantId
+                );
+
+
+        if(error){
+
+            throw new Error(
+                error.message
+            );
+        }
+
+
+        if(
+            String(
+                currentRestaurantId
+            ) ===
+            String(
+                restaurantId
+            )
+        ){
+
+            closeChat();
+
+            currentRestaurantId =
+                null;
+
+            currentRestaurant =
+                null;
+
+            currentConversationId =
+                null;
+        }
+
+
+        currentRestaurants =
+            currentRestaurants.filter(
+                item =>
+                    String(item.id) !==
+                    String(restaurantId)
+            );
+
+        renderRestaurants(
+            currentRestaurants
+        );
+
+        const chatSection =
+            document.getElementById(
+                "chat-section"
+            );
+
+        if(chatSection?.style.display === "flex"){
+            if(String(currentRestaurantId) === String(restaurantId)){
+                closeChat();
+            }else if(!currentConversationId){
+                filterChatRestaurants(
+                    document.getElementById(
+                        "chat-restaurant-search"
+                    )?.value || ""
+                );
+            }
+        }
+
+        await loadRestaurants();
+
+        alert(
+            "تم حذف المطعم بنجاح."
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "DELETE RESTAURANT ERROR:",
+            error
+        );
+
+
+        alert(
+            "تعذر حذف المطعم:\n\n" +
+            error.message
+        );
+    }
+}
+
+
+/* =====================================================
+   ADMIN
+===================================================== */
+
+async function openAdmin(){
+
+    const role =
+        String(
+            currentProfile?.role ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        role !== "admin"
+    ){
+
+        alert(
+            "هذه الصفحة للـAdmin فقط."
+        );
+
+        return;
+    }
+
+
+    const section =
+        document.getElementById(
+            "admin-section"
+        );
+
+
+    section.style.display =
+        "block";
+
+
+    await loadEmployees();
+
+
+    setTimeout(
+        () => {
+
+            section.scrollIntoView(
+                {
+                    behavior:
+                        "smooth",
+
+                    block:
+                        "start"
+                }
+            );
+
+        },
+        100
+    );
+}
+
+
+function closeAdmin(){
+
+    document.getElementById(
+        "admin-section"
+    ).style.display =
+        "none";
+}
+
+
+/* =====================================================
+   EMPLOYEE FUNCTION
+===================================================== */
+
+async function employeeFunction(
+    payload
+){
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .functions
+            .invoke(
+                "bright-api",
+                {
+                    body:
+                        payload
+                }
+            );
+
+
+    if(error){
+
+        throw new Error(
+            error.message ||
+            "تعذر الاتصال بـ bright-api."
+        );
+    }
+
+
+    if(
+        data?.error
+    ){
+
+        throw new Error(
+            data.error
+        );
+    }
+
+
+    return data || {};
+}
+
+
+/* =====================================================
+   LOAD EMPLOYEES
+===================================================== */
+
+async function loadEmployees(){
+
+    const tbody =
+        document.getElementById(
+            "users-table-body"
+        );
+
+
+    tbody.innerHTML =
+        `
+        <tr>
+            <td colspan="5">
+                جاري تحميل الموظفين...
+            </td>
+        </tr>
+        `;
+
+
+    try{
+
+        const result =
+            await employeeFunction(
+                {
+                    action:
+                        "list"
+                }
+            );
+
+
+        const users =
+            result.users ||
+            [];
+
+
+        if(
+            users.length === 0
+        ){
+
+            tbody.innerHTML =
+                `
+                <tr>
+                    <td colspan="5">
+                        لا يوجد موظفون.
+                    </td>
+                </tr>
+                `;
+
+            return;
+        }
+
+
+        tbody.innerHTML =
+            "";
+
+
+        users.forEach(
+            user => {
+
+                const tr =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const status =
+                    user.is_active
+                        ?
+                            `
+                            <span
+                                class="status-active"
+                            >
+                                نشط
+                            </span>
+                            `
+                        :
+                            `
+                            <span
+                                class="status-disabled"
+                            >
+                                معطل
+                            </span>
+                            `;
+
+
+                const isCurrentUser =
+                    String(
+                        user.id
+                    ) ===
+                    String(
+                        currentUser?.id
+                    );
+
+
+                const buttons =
+                    isCurrentUser
+                        ?
+                            `
+                            <span
+                                style="
+                                    color:#1e3c72;
+                                    font-weight:bold;
+                                "
+                            >
+                                حسابك
+                            </span>
+                            `
+                        :
+                            `
+                            <button
+                                class="
+                                    user-action
+                                    disable-user
+                                "
+                                type="button"
+                                onclick="
+                                    toggleEmployee(
+                                        '${user.id}',
+                                        ${Boolean(
+                                            user.is_active
+                                        )}
+                                    )
+                                "
+                            >
+                                ${
+                                    user.is_active
+                                        ?
+                                            "تعطيل"
+                                        :
+                                            "تفعيل"
+                                }
+                            </button>
+
+
+                            <button
+                                class="
+                                    user-action
+                                    delete-user
+                                "
+                                type="button"
+                                onclick="
+                                    deleteEmployee(
+                                        '${user.id}'
+                                    )
+                                "
+                            >
+                                حذف
+                            </button>
+                            `;
+
+
+                tr.innerHTML =
+                    `
+                    <td>
+                        ${escapeHTML(
+                            user.display_name ||
+                            "بدون اسم"
+                        )}
+                    </td>
+
+                    <td dir="ltr">
+                        ${escapeHTML(
+                            user.email ||
+                            "غير متاح"
+                        )}
+                    </td>
+
+                    <td>
+                        ${
+                            String(
+                                user.role ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase() ===
+                            "admin"
+                                ?
+                                    "Admin"
+                                :
+                                    "موظف"
+                        }
+                    </td>
+
+                    <td>
+                        ${status}
+                    </td>
+
+                    <td>
+                        ${buttons}
+                    </td>
+                    `;
+
+
+                tbody.appendChild(
+                    tr
+                );
+            }
+        );
+
+    }catch(error){
+
+        tbody.innerHTML =
+            `
+            <tr>
+
+                <td
+                    colspan="5"
+                    style="
+                        color:#dc3545;
+                        padding:20px;
+                    "
+                >
+
+                    ${escapeHTML(
+                        error.message
+                    )}
+
+                </td>
+
+            </tr>
+            `;
+    }
+}
+
+
+/* =====================================================
+   EMPLOYEE MODAL
+===================================================== */
+
+function openEmployeeModal(){
+
+    document.getElementById(
+        "employee-email"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "employee-password"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "employee-name"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "employee-modal"
+    ).style.display =
+        "flex";
+}
+
+
+/* =====================================================
+   CREATE EMPLOYEE
+===================================================== */
+
+async function createEmployee(){
+
+    const email =
+        document.getElementById(
+            "employee-email"
+        )
+        .value
+        .trim();
+
+
+    const password =
+        document.getElementById(
+            "employee-password"
+        )
+        .value;
+
+
+    const displayName =
+        document.getElementById(
+            "employee-name"
+        )
+        .value
+        .trim();
+
+
+    if(
+        !email ||
+        !password ||
+        !displayName
+    ){
+
+        alert(
+            "اكتب كل بيانات الموظف."
+        );
+
+        return;
+    }
+
+
+    if(
+        password.length < 6
+    ){
+
+        alert(
+            "كلمة السر لازم تكون 6 أحرف أو أكثر."
+        );
+
+        return;
+    }
+
+
+    try{
+
+        const result =
+            await employeeFunction(
+                {
+                    action:
+                        "create",
+
+                    email,
+
+                    password,
+
+                    display_name:
+                        displayName
+                }
+            );
+
+
+        if(
+            !result.success
+        ){
+
+            throw new Error(
+                result.error ||
+                "فشل إنشاء الموظف."
+            );
+        }
+
+
+        closeModal(
+            "employee-modal"
+        );
+
+
+        await loadEmployees();
+
+
+        alert(
+            "تم إنشاء حساب الموظف بنجاح."
+        );
+
+    }catch(error){
+
+        alert(
+            "تعذر إنشاء الموظف:\n\n" +
+            error.message
+        );
+    }
+}
+
+
+/* =====================================================
+   TOGGLE EMPLOYEE
+===================================================== */
+
+async function toggleEmployee(
+    userId,
+    currentStatus
+){
+
+    if(
+        String(
+            userId
+        ) ===
+        String(
+            currentUser?.id
+        )
+    ){
+
+        alert(
+            "لا يمكنك تعطيل حسابك الحالي."
+        );
+
+        return;
+    }
+
+
+    const action =
+        currentStatus
+            ?
+                "تعطيل"
+            :
+                "تفعيل";
+
+
+    if(
+        !confirm(
+            `هل تريد ${action} هذا الحساب؟`
+        )
+    ){
+
+        return;
+    }
+
+
+    try{
+
+        const result =
+            await employeeFunction(
+                {
+                    action:
+                        "toggle",
+
+                    user_id:
+                        userId,
+
+                    is_active:
+                        !currentStatus
+                }
+            );
+
+
+        if(
+            !result.success
+        ){
+
+            throw new Error(
+                result.error ||
+                "فشل تعديل الحساب."
+            );
+        }
+
+
+        await loadEmployees();
+
+    }catch(error){
+
+        alert(
+            "تعذر تعديل الموظف:\n\n" +
+            error.message
+        );
+    }
+}
+
+
+/* =====================================================
+   DELETE EMPLOYEE
+===================================================== */
+
+async function deleteEmployee(
+    userId
+){
+
+    if(
+        String(
+            userId
+        ) ===
+        String(
+            currentUser?.id
+        )
+    ){
+
+        alert(
+            "لا يمكنك حذف حسابك الحالي."
+        );
+
+        return;
+    }
+
+
+    if(
+        !confirm(
+            "هل أنت متأكد من حذف حساب الموظف؟"
+        )
+    ){
+
+        return;
+    }
+
+
+    try{
+
+        const result =
+            await employeeFunction(
+                {
+                    action:
+                        "delete",
+
+                    user_id:
+                        userId
+                }
+            );
+
+
+        if(
+            !result.success
+        ){
+
+            throw new Error(
+                result.error ||
+                "فشل حذف الموظف."
+            );
+        }
+
+
+        await loadEmployees();
+
+    }catch(error){
+
+        alert(
+            "تعذر حذف الموظف:\n\n" +
+            error.message
+        );
+    }
+}
+
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+function closeModal(
+    id
+){
+
+    const modal =
+        document.getElementById(
+            id
+        );
+
+
+    if(modal){
+
+        modal.style.display =
+            "none";
+    }
+}
+
+
+/* =====================================================
+   CHAT
+===================================================== */
+
+function stopChatLiveUpdates(){
+
+    if(
+        chatRealtimeChannel
+    ){
+
+        try{
+
+            supabaseClient
+                .removeChannel(
+                    chatRealtimeChannel
+                );
+
+        }catch(error){
+
+            console.error(
+                error
+            );
+        }
+
+
+        chatRealtimeChannel =
+            null;
+    }
+
+
+    if(
+        chatRefreshTimer
+    ){
+
+        clearInterval(
+            chatRefreshTimer
+        );
+
+        chatRefreshTimer =
+            null;
+    }
+
+
+    if(
+        conversationRefreshTimer
+    ){
+
+        clearInterval(
+            conversationRefreshTimer
+        );
+
+        conversationRefreshTimer =
+            null;
+    }
+
+
+    currentLastMessageId =
+        null;
+
+    currentConversationSignature =
+        "";
+
+    chatRefreshBusy =
+        false;
+
+    conversationRefreshBusy =
+        false;
+}
+
+
+async function openChat(){
+
+    document.getElementById(
+        "chat-section"
+    ).style.display =
+        "flex";
+
+
+    showRestaurantChooser();
+}
+
+
+function closeChat(){
+
+    stopChatLiveUpdates();
+
+
+    document.getElementById(
+        "chat-section"
+    ).style.display =
+        "none";
+}
+
+
+async function openRestaurantChat(
+    restaurantId
+){
+
+    document.getElementById(
+        "chat-section"
+    ).style.display =
+        "flex";
+
+
+    await setCurrentRestaurant(
+        restaurantId
+    );
+}
+
+
+/* =====================================================
+   CHAT RESTAURANT SEARCH
+===================================================== */
+
+function renderChatRestaurantList(restaurants){
+
+    const container =
+        document.getElementById(
+            "conversations-list"
+        );
+
+    if(!container){
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if(!restaurants || restaurants.length === 0){
+
+        container.innerHTML = `
+            <div class="empty-chat">
+                لا يوجد مطعم مطابق للبحث.
+            </div>
+        `;
+
+        return;
+    }
+
+    restaurants.forEach(restaurant => {
+
+        const item = document.createElement("div");
+
+        item.className = "conversation-item";
+
+        item.innerHTML = `
+            <h4>
+                <i class="fa-solid fa-store"></i>
+                ${escapeHTML(restaurant.name || "مطعم")}
+            </h4>
+
+            <span class="conversation-phone">
+                ${restaurant.whatsapp_number_1
+                    ? escapeHTML(restaurant.whatsapp_number_1)
+                    : "لا يوجد رقم واتساب"}
+            </span>
+        `;
+
+        item.onclick = () =>
+            openRestaurantChat(restaurant.id);
+
+        container.appendChild(item);
+    });
+}
+
+function filterChatRestaurants(value){
+
+    const query = String(value || "")
+        .trim()
+        .toLowerCase();
+
+    const filtered =
+        !query
+            ? currentRestaurants
+            : currentRestaurants.filter(restaurant => {
+                const name = String(restaurant.name || "").toLowerCase();
+                const phone = String(restaurant.phone || "").toLowerCase();
+                const whatsapp = String(restaurant.whatsapp_number_1 || "").toLowerCase();
+
+                return (
+                    name.includes(query) ||
+                    phone.includes(query) ||
+                    whatsapp.includes(query)
+                );
+            });
+
+    renderChatRestaurantList(filtered);
+}
+
+
+/* =====================================================
+   CHOOSE RESTAURANT
+===================================================== */
+
+function showRestaurantChooser(){
+
+    stopChatLiveUpdates();
+
+
+    currentRestaurantId =
+        null;
+
+    currentRestaurant =
+        null;
+
+    currentConversationId =
+        null;
+
+
+    document.getElementById(
+        "chat-restaurant-name"
+    ).innerText =
+        "اختر مطعمًا";
+
+
+    document.getElementById(
+        "chat-business-number"
+    ).innerText =
+        "رقم المطعم";
+
+
+    document.getElementById(
+        "messages-list"
+    ).innerHTML =
+        `
+        <div
+            style="
+                padding:40px;
+                color:#777;
+                text-align:center;
+            "
+        >
+            اختر مطعمًا لفتح المحادثة.
+        </div>
+        `;
+
+
+    const searchInput =
+        document.getElementById(
+            "chat-restaurant-search"
+        );
+
+    if(searchInput){
+        searchInput.value = "";
+    }
+
+    renderChatRestaurantList(
+        currentRestaurants
+    );
+}
+
+
+/* =====================================================
+   SET CURRENT RESTAURANT
+===================================================== */
+
+async function setCurrentRestaurant(
+    restaurantId
+){
+
+    stopChatLiveUpdates();
+
+
+    const restaurant =
+        currentRestaurants.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    restaurantId
+                )
+        );
+
+
+    if(!restaurant){
+
+        showRestaurantChooser();
+
+        return;
+    }
+
+
+    currentRestaurantId =
+        restaurant.id;
+
+
+    currentRestaurant =
+        restaurant;
+
+
+    currentConversationId =
+        null;
+
+
+    currentLastMessageId =
+        null;
+
+
+    await loadRestaurantConversation(
+        restaurant
+    );
+
+
+    startChatLiveUpdates();
+}
+
+
+/* =====================================================
+   LOAD RESTAURANT CONVERSATION
+===================================================== */
+
+async function loadRestaurantConversation(
+    restaurant
+){
+
+    const container =
+        document.getElementById(
+            "conversations-list"
+        );
+
+
+    const restaurantPhone =
+        normalizeInternationalNumber(
+            restaurant.whatsapp_number_1
+        );
+
+
+    document.getElementById(
+        "chat-restaurant-name"
+    ).innerText =
+        restaurant.name;
+
+
+    document.getElementById(
+        "chat-business-number"
+    ).innerText =
+        restaurantPhone ||
+        "لا يوجد رقم";
+
+
+    container.innerHTML =
+        `
+        <div
+            class="chat-top-info"
+        >
+
+            <h3>
+                ${escapeHTML(
+                    restaurant.name
+                )}
+            </h3>
+
+            <span
+                class="restaurant-phone"
+            >
+                ${escapeHTML(
+                    restaurantPhone ||
+                    "لا يوجد رقم واتساب"
+                )}
+            </span>
+
+        </div>
+        `;
+
+
+    if(!restaurantPhone){
+
+        container.innerHTML +=
+            `
+            <div
+                class="empty-chat"
+                style="
+                    color:#dc3545;
+                "
+            >
+
+                المطعم ليس له رقم واتساب.
+
+            </div>
+            `;
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "conversations"
+            )
+            .select(
+                `
+                id,
+                restaurant_id,
+                assigned_user_id,
+                status,
+                customer_phone,
+                business_phone_number,
+                business_phone_number_id,
+                created_at,
+                updated_at
+                `
+            )
+            .eq(
+                "restaurant_id",
+                restaurant.id
+            )
+            .eq(
+                "customer_phone",
+                restaurantPhone
+            )
+            .order(
+                "updated_at",
+                {
+                    ascending:
+                        false
+                }
+            );
+
+
+    if(error){
+
+        container.innerHTML +=
+            `
+            <div
+                class="empty-chat"
+                style="
+                    color:#dc3545;
+                "
+            >
+
+                تعذر تحميل المحادثة.
+
+                <br><br>
+
+                ${escapeHTML(
+                    error.message
+                )}
+
+            </div>
+            `;
+
+        return;
+    }
+
+
+    currentConversationSignature =
+        makeConversationSignature(
+            data || []
+        );
+
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        container.innerHTML +=
+            `
+            <div
+                class="empty-chat"
+            >
+
+                لا توجد محادثة لهذا المطعم حتى الآن.
+
+
+                <button
+                    class="
+                        create-conversation-btn
+                    "
+                    type="button"
+                    onclick="
+                        createRestaurantConversation(
+                            '${restaurant.id}'
+                        )
+                    "
+                >
+
+                    <i
+                        class="fa-solid fa-plus"
+                    ></i>
+
+                    فتح المحادثة
+
+                </button>
+
+            </div>
+            `;
+
+        return;
+    }
+
+
+    renderConversationItems(
+        data
+    );
+
+
+    selectConversation(
+        data[0]
+    );
+}
+
+
+/* =====================================================
+   CREATE RESTAURANT CONVERSATION
+===================================================== */
+
+async function createRestaurantConversation(
+    restaurantId
+){
+
+    const restaurant =
+        currentRestaurants.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    restaurantId
+                )
+        );
+
+
+    if(!restaurant){
+
+        alert(
+            "المطعم غير موجود."
+        );
+
+        return;
+    }
+
+
+    const restaurantPhone =
+        normalizeInternationalNumber(
+            restaurant.whatsapp_number_1
+        );
+
+
+    if(!restaurantPhone){
+
+        alert(
+            "المطعم ليس له رقم واتساب."
+        );
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "conversations"
+            )
+            .insert(
+                {
+                    restaurant_id:
+                        restaurant.id,
+
+                    assigned_user_id:
+                        currentUser?.id ||
+                        null,
+
+                    customer_phone:
+                        restaurantPhone,
+
+                    business_phone_number:
+                        null,
+
+                    business_phone_number_id:
+                        null,
+
+                    status:
+                        "open"
+                }
+            )
+            .select(
+                `
+                id,
+                restaurant_id,
+                assigned_user_id,
+                status,
+                customer_phone,
+                business_phone_number,
+                business_phone_number_id,
+                created_at,
+                updated_at
+                `
+            )
+            .single();
+
+
+    if(error){
+
+        if(
+            String(
+                error.message
+            )
+            .toLowerCase()
+            .includes(
+                "duplicate"
+            )
+        ){
+
+            await loadRestaurantConversation(
+                restaurant
+            );
+
+            return;
+        }
+
+
+        alert(
+            "تعذر فتح المحادثة:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    currentConversationId =
+        data.id;
+
+
+    await loadRestaurantConversation(
+        restaurant
+    );
+
+
+    const {
+        data:
+            existingConversation
+    } =
+        await supabaseClient
+            .from(
+                "conversations"
+            )
+            .select(
+                `
+                id,
+                restaurant_id,
+                assigned_user_id,
+                status,
+                customer_phone,
+                business_phone_number,
+                business_phone_number_id,
+                created_at,
+                updated_at
+                `
+            )
+            .eq(
+                "id",
+                data.id
+            )
+            .maybeSingle();
+
+
+    if(
+        existingConversation
+    ){
+
+        selectConversation(
+            existingConversation
+        );
+    }
+
+
+    startChatLiveUpdates();
+}
+
+
+/* =====================================================
+   RENDER CONVERSATION ITEMS
+===================================================== */
+
+function renderConversationItems(
+    conversations
+){
+
+    const container =
+        document.getElementById(
+            "conversations-list"
+        );
+
+
+    conversations.forEach(
+        conversation => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "conversation-item";
+
+
+            item.dataset.id =
+                conversation.id;
+
+
+            item.innerHTML =
+                `
+                <h4>
+
+                    <i
+                        class="fa-solid fa-comments"
+                    ></i>
+
+                    محادثة المطعم
+
+                </h4>
+
+
+                <small>
+
+                    الحالة:
+                    ${escapeHTML(
+                        conversation.status ||
+                        "open"
+                    )}
+
+                </small>
+
+
+                <span
+                    class="conversation-phone"
+                >
+
+                    ${escapeHTML(
+                        conversation.customer_phone ||
+                        ""
+                    )}
+
+                </span>
+
+                `;
+
+
+            item.onclick =
+                () =>
+                    selectConversation(
+                        conversation
+                    );
+
+
+            container.appendChild(
+                item
+            );
+        }
+    );
+}
+
+
+/* =====================================================
+   CONVERSATION SIGNATURE
+===================================================== */
+
+function makeConversationSignature(
+    conversations
+){
+
+    return (
+        conversations || []
+    )
+    .map(
+        item =>
+            String(
+                item.id
+            ) +
+            "|" +
+            String(
+                item.updated_at ||
+                ""
+            )
+    )
+    .join("||");
+}
+
+
+/* =====================================================
+   SELECT CONVERSATION
+===================================================== */
+
+function selectConversation(
+    conversation
+){
+
+    if(!conversation){
+
+        return;
+    }
+
+
+    currentConversationId =
+        conversation.id;
+
+
+    currentRestaurantId =
+        conversation.restaurant_id;
+
+
+    currentRestaurant =
+        currentRestaurants.find(
+            restaurant =>
+                String(
+                    restaurant.id
+                ) ===
+                String(
+                    conversation.restaurant_id
+                )
+        ) ||
+        currentRestaurant;
+
+
+    document.getElementById(
+        "chat-restaurant-name"
+    ).innerText =
+        currentRestaurant?.name ||
+        "المطعم";
+
+
+    document.getElementById(
+        "chat-business-number"
+    ).innerText =
+        conversation.customer_phone ||
+        "رقم المطعم";
+
+
+    document
+        .querySelectorAll(
+            "#conversations-list .conversation-item"
+        )
+        .forEach(
+            item => {
+
+                item.classList.toggle(
+                    "active",
+                    String(
+                        item.dataset.id
+                    ) ===
+                    String(
+                        conversation.id
+                    )
+                );
+            }
+        );
+
+
+    document.getElementById(
+        "message-input"
+    ).placeholder =
+        conversation.customer_phone
+            ?
+                "اكتب رسالة إلى " +
+                conversation.customer_phone +
+                "..."
+            :
+                "اكتب رسالة...";
+
+
+    loadMessages(
+        conversation.id
+    );
+}
+
+
+/* =====================================================
+   LOAD MESSAGES
+===================================================== */
+
+async function loadMessages(
+    conversationId,
+    showLoading = true
+){
+
+    if(!conversationId){
+
+        return;
+    }
+
+
+    const container =
+        document.getElementById(
+            "messages-list"
+        );
+
+
+    if(showLoading){
+
+        container.innerHTML =
+            `
+            <div
+                style="
+                    padding:30px;
+                    color:#777;
+                    text-align:center;
+                "
+            >
+                جاري تحميل الرسائل...
+            </div>
+            `;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from(
+                "messages"
+            )
+            .select(
+                `
+                id,
+                conversation_id,
+                employee_id,
+                sender_type,
+                message_text,
+                whatsapp_message_id,
+                created_at
+                `
+            )
+            .eq(
+                "conversation_id",
+                conversationId
+            )
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+    if(error){
+
+        if(showLoading){
+
+            container.innerHTML =
+                `
+                <div
+                    style="
+                        padding:30px;
+                        color:#dc3545;
+                    "
+                >
+
+                    تعذر تحميل الرسائل.
+
+                    <br><br>
+
+                    ${escapeHTML(
+                        error.message
+                    )}
+
+                </div>
+                `;
+        }
+
+        console.error(
+            error
+        );
+
+        return;
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        currentLastMessageId =
+            null;
+
+
+        container.innerHTML =
+            `
+            <div
+                style="
+                    padding:40px;
+                    color:#777;
+                    text-align:center;
+                "
+            >
+                لا توجد رسائل حتى الآن.
+            </div>
+            `;
+
+        return;
+    }
+
+
+    data.forEach(
+        message => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            const senderType =
+                String(
+                    message.sender_type ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const isRestaurant =
+                senderType ===
+                "restaurant";
+
+
+            div.className =
+                "message " +
+                (
+                    isRestaurant
+                        ?
+                            "restaurant"
+                        :
+                            "employee"
+                );
+
+
+            const sender =
+                isRestaurant
+                    ?
+                        "المطعم"
+                    :
+                        (
+                            currentProfile?.display_name ||
+                            currentUser?.email ||
+                            "المستخدم"
+                        );
+
+
+            const date =
+                new Date(
+                    message.created_at
+                )
+                .toLocaleString(
+                    "ar-EG",
+                    {
+                        dateStyle:
+                            "short",
+
+                        timeStyle:
+                            "short"
+                    }
+                );
+
+
+            div.innerHTML =
+                `
+                <div
+                    class="message-sender"
+                >
+
+                    ${escapeHTML(
+                        sender
+                    )}
+
+                </div>
+
+
+                <div
+                    class="message-text"
+                >
+
+                    ${escapeHTML(
+                        message.message_text
+                    )}
+
+                </div>
+
+
+                <div
+                    class="message-time"
+                >
+
+                    ${escapeHTML(
+                        date
+                    )}
+
+                </div>
+                `;
+
+
+            container.appendChild(
+                div
+            );
+        }
+    );
+
+
+    currentLastMessageId =
+        data[data.length - 1].id;
+
+
+    container.scrollTop =
+        container.scrollHeight;
+}
+
+
+/* =====================================================
+   SEND MESSAGE
+===================================================== */
+
+async function sendMessage(){
+
+    const input =
+        document.getElementById(
+            "message-input"
+        );
+
+
+    const button =
+        document.getElementById(
+            "send-message-button"
+        );
+
+
+    const text =
+        input.value.trim();
+
+
+    if(!text){
+
+        return;
+    }
+
+
+    if(
+        !currentConversationId
+    ){
+
+        alert(
+            "اختار مطعمًا أولًا."
+        );
+
+        return;
+    }
+
+
+    try{
+
+        button.disabled =
+            true;
+
+
+        button.innerHTML =
+            `
+            <i
+                class="
+                    fa-solid
+                    fa-spinner
+                    fa-spin
+                "
+            ></i>
+            `;
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .functions
+                .invoke(
+                    "whatsapp-send",
+                    {
+                        body:{
+                            conversation_id:
+                                currentConversationId,
+
+                            message:
+                                text
+                        }
+                    }
+                );
+
+
+        if(error){
+
+            let message =
+                error.message ||
+                "فشل الإرسال.";
+
+
+            if(
+                error.context
+            ){
+
+                try{
+
+                    const response =
+                        error.context;
+
+
+                    const contentType =
+                        response.headers.get(
+                            "content-type"
+                        );
+
+
+                    if(
+                        contentType &&
+                        contentType.includes(
+                            "application/json"
+                        )
+                    ){
+
+                        const json =
+                            await response.json();
+
+
+                        message =
+                            json?.error ||
+                            json?.message ||
+                            message;
+
+                    }else{
+
+                        const text =
+                            await response.text();
+
+
+                        if(text){
+
+                            message =
+                                text;
+                        }
+                    }
+
+                }catch(e){
+
+                    console.error(
+                        e
+                    );
+                }
+            }
+
+
+            throw new Error(
+                message
+            );
+        }
+
+
+        if(
+            data?.error
+        ){
+
+            throw new Error(
+                data.error
+            );
+        }
+
+
+        if(
+            !data?.success
+        ){
+
+            throw new Error(
+                "Meta لم تؤكد الإرسال."
+            );
+        }
+
+
+        input.value =
+            "";
+
+
+        await loadMessages(
+            currentConversationId,
+            false
+        );
+
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "تعذر إرسال الرسالة:\n\n" +
+            error.message
+        );
+
+    }finally{
+
+        button.disabled =
+            false;
+
+        button.innerText =
+            "إرسال";
+    }
+}
+
+
+/* =====================================================
+   LIVE CHAT
+===================================================== */
+
+function startChatLiveUpdates(){
+
+    stopChatLiveUpdates();
+
+
+    if(
+        !currentRestaurantId
+    ){
+
+        return;
+    }
+
+
+    chatRealtimeChannel =
+        supabaseClient
+            .channel(
+                "restaurant-chat-" +
+                String(
+                    currentRestaurantId
+                ) +
+                "-" +
+                Date.now()
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event:
+                        "INSERT",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "messages"
+                },
+                async payload => {
+
+                    if(
+                        !currentConversationId
+                    ){
+
+                        return;
+                    }
+
+
+                    if(
+                        String(
+                            payload.new?.conversation_id
+                        ) !==
+                        String(
+                            currentConversationId
+                        )
+                    ){
+
+                        return;
+                    }
+
+
+                    await loadMessages(
+                        currentConversationId,
+                        false
+                    );
+                }
+            )
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "CHAT REALTIME:",
+                        status
+                    );
+                }
+            );
+
+
+    chatRefreshTimer =
+        setInterval(
+            async () => {
+
+                await refreshCurrentMessages();
+
+            },
+            2000
+        );
+
+
+    conversationRefreshTimer =
+        setInterval(
+            async () => {
+
+                await refreshRestaurantConversation();
+
+            },
+            4000
+        );
+}
+
+
+async function refreshCurrentMessages(){
+
+    if(
+        chatRefreshBusy ||
+        !currentConversationId
+    ){
+
+        return;
+    }
+
+
+    chatRefreshBusy =
+        true;
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "messages"
+                )
+                .select(
+                    "id"
+                )
+                .eq(
+                    "conversation_id",
+                    currentConversationId
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending:
+                            false
+                    }
+                )
+                .limit(
+                    1
+                );
+
+
+        if(error){
+
+            return;
+        }
+
+
+        const latest =
+            data?.[0];
+
+
+        if(
+            latest &&
+            String(
+                latest.id
+            ) !==
+            String(
+                currentLastMessageId
+            )
+        ){
+
+            await loadMessages(
+                currentConversationId,
+                false
+            );
+        }
+
+    }finally{
+
+        chatRefreshBusy =
+            false;
+    }
+}
+
+
+async function refreshRestaurantConversation(){
+
+    if(
+        conversationRefreshBusy ||
+        !currentRestaurantId
+    ){
+
+        return;
+    }
+
+
+    const restaurant =
+        currentRestaurants.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    currentRestaurantId
+                )
+        );
+
+
+    if(!restaurant){
+
+        return;
+    }
+
+
+    const restaurantPhone =
+        normalizeInternationalNumber(
+            restaurant.whatsapp_number_1
+        );
+
+
+    if(!restaurantPhone){
+
+        return;
+    }
+
+
+    conversationRefreshBusy =
+        true;
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "conversations"
+                )
+                .select(
+                    `
+                    id,
+                    restaurant_id,
+                    assigned_user_id,
+                    status,
+                    customer_phone,
+                    business_phone_number,
+                    business_phone_number_id,
+                    created_at,
+                    updated_at
+                    `
+                )
+                .eq(
+                    "restaurant_id",
+                    restaurant.id
+                )
+                .eq(
+                    "customer_phone",
+                    restaurantPhone
+                )
+                .order(
+                    "updated_at",
+                    {
+                        ascending:
+                            false
+                    }
+                );
+
+
+        if(error){
+
+            console.error(
+                error
+            );
+
+            return;
+        }
+
+
+        const signature =
+            makeConversationSignature(
+                data || []
+            );
+
+
+        if(
+            signature ===
+            currentConversationSignature
+        ){
+
+            return;
+        }
+
+
+        currentConversationSignature =
+            signature;
+
+
+        const oldId =
+            currentConversationId;
+
+
+        const container =
+            document.getElementById(
+                "conversations-list"
+            );
+
+
+        container.innerHTML =
+            `
+            <div
+                class="chat-top-info"
+            >
+
+                <h3>
+                    ${escapeHTML(
+                        restaurant.name
+                    )}
+                </h3>
+
+                <span
+                    class="restaurant-phone"
+                >
+                    ${escapeHTML(
+                        restaurantPhone
+                    )}
+                </span>
+
+            </div>
+            `;
+
+
+        if(
+            !data ||
+            data.length === 0
+        ){
+
+            container.innerHTML +=
+                `
+                <div
+                    class="empty-chat"
+                >
+
+                    لا توجد محادثة لهذا المطعم حتى الآن.
+
+
+                    <button
+                        class="
+                            create-conversation-btn
+                        "
+                        type="button"
+                        onclick="
+                            createRestaurantConversation(
+                                '${restaurant.id}'
+                            )
+                        "
+                    >
+
+                        فتح المحادثة
+
+                    </button>
+
+                </div>
+                `;
+
+            return;
+        }
+
+
+        renderConversationItems(
+            data
+        );
+
+
+        const activeConversation =
+            data.find(
+                item =>
+                    String(
+                        item.id
+                    ) ===
+                    String(
+                        oldId
+                    )
+            ) ||
+            data[0];
+
+
+        selectConversation(
+            activeConversation
+        );
+
+    }finally{
+
+        conversationRefreshBusy =
+            false;
+    }
+}
+
+
+/* =====================================================
+   ENTER
+===================================================== */
+
+document
+    .getElementById(
+        "login-password"
+    )
+    .addEventListener(
+        "keydown",
+        e => {
+
+            if(
+                e.key ===
+                "Enter"
+            ){
+
+                e.preventDefault();
+
+                loginUser();
+            }
+        }
+    );
+
+
+document
+    .getElementById(
+        "message-input"
+    )
+    .addEventListener(
+        "keydown",
+        e => {
+
+            if(
+                e.key ===
+                    "Enter" &&
+                !e.shiftKey
+            ){
+
+                e.preventDefault();
+
+                sendMessage();
+            }
+        }
+    );
+
+
+/* =====================================================
+   SITE CHECK
+===================================================== */
+
+setInterval(
+    async () => {
+
+        const enabled =
+            await loadSiteStatus();
+
+
+        if(
+            enabled !==
+            currentSiteEnabled
+        ){
+
+            if(!enabled){
+
+                stopChatLiveUpdates();
+
+
+                await supabaseClient
+                    .auth
+                    .signOut();
+
+
+                currentUser =
+                    null;
+
+                currentProfile =
+                    null;
+
+                currentRestaurantId =
+                    null;
+
+                currentRestaurant =
+                    null;
+
+                currentConversationId =
+                    null;
+
+
+                document.getElementById(
+                    "admin-section"
+                ).style.display =
+                    "none";
+
+
+                applySiteStatus(
+                    false
+                );
+
+                return;
+            }
+
+
+            applySiteStatus(
+                true
+            );
+        }
+
+    },
+    10000
+);
+
+
+/* =====================================================
+   START
+===================================================== */
+
+async function startSite(){
+
+    const enabled =
+        await loadSiteStatus();
+
+
+    currentSiteEnabled =
+        enabled;
+
+
+    if(!enabled){
+
+        applySiteStatus(
+            false
+        );
+
+        return;
+    }
+
+
+    try{
+
+        await supabaseClient
+            .auth
+            .signOut({
+                scope:
+                    "local"
+            });
+
+    }catch(error){
+
+        console.warn(
+            error
+        );
+    }
+
+
+    currentUser =
+        null;
+
+    currentProfile =
+        null;
+
+    currentRestaurantId =
+        null;
+
+    currentRestaurant =
+        null;
+
+    currentConversationId =
+        null;
+
+
+    stopChatLiveUpdates();
+
+
+    document.getElementById(
+        "login-screen"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "main-content"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "admin-section"
+    ).style.display =
+        "none";
+}
+
+
+startSite();
+
+</script>
+
+</body>
+
+</html>
